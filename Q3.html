@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>Question 3</title>
+</head>
+
+<body style="
+    background-color: #060a1a;
+    ">
+    <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        ">
+        <h1 style="
+            color: #efefef;
+            font-size: 50px;
+            ">
+            Question 3
+        </h1>
+
+        <svg id="Question3" width="1300" height="900"></svg>
+    </div>
+
+    <script>
+        var rawData = [];
+        var date = [];
+        var count = 0;
+        var interval;
+        var parseTime = d3.timeParse("%b %Y");
+
+        d3.csv("https://raw.githubusercontent.com/Pyrole-2002/D3_Lab1/main/unemployment.csv", function (data) {
+            rawData = data;
+            data.forEach(function (d) {
+                date.push(parseTime(d.date));
+            });
+
+            xScale = d3.scaleTime()
+                .domain(d3.extent(date))
+                .range([0, width]);
+            yScale = d3.scaleLinear()
+                .domain([yMax, 0])
+                .range([0, height]);
+                
+            var xAxis = d3.axisBottom(xScale)
+                .tickFormat(d3.timeFormat("%Y"));
+            var yAxis = d3.axisLeft(yScale)
+                .tickFormat(function (d) {
+                    return d + "%";
+                });
+
+            group.append("g")
+                .attr("transform", "translate(" + 0 + ", " + height + ")")
+                .call(xAxis)
+                .selectAll("line,path")
+                .style("stroke", "#efefef")
+                .style("stroke-width", "2px");
+                
+            group.append("g")
+                .attr("transform", "translate(" + 0 + ", " + 0 + ")")
+                .call(yAxis)
+                .selectAll("line,path")
+                .style("stroke", "#efefef")
+                .style("stroke-width", "2px");
+
+            group.selectAll("text")
+                .style("font-family", "Rubik")
+                .style("fill", "#efefef")
+                .style("font-size", "18px");
+            
+            group.append("text")
+                .attr("id", "yAxisLabel")
+                .attr("transform", "rotate(-90)")
+                .attr("font-size", "25px")
+                .attr("y", 40 - (margin / 2))
+                .attr("x", -40 - (height / 2))
+                .style("font-family", "Rubik")
+                .style("fill", "#efefef")
+                .text("Unemployment Rate");
+
+            group.append("text")
+                .attr("id", "xAxisLabel")
+                .attr("font-size", "25px")
+                .attr("y", height + 70)
+                .attr("x", (width / 2) - 30)
+                .style("font-family", "Rubik")
+                .style("fill", "#efefef")
+                .text("YEAR");
+            
+            interval = setInterval(updatePlot, 5);
+        })
+        var canvas = d3.select("#Question3");
+        var margin = 200;
+        var width = canvas.attr("width") - margin;
+        var height = canvas.attr("height") - margin;
+
+        var xScale;
+        var yScale;
+        var yMax = 10;
+        var group = canvas.append("g")
+            .attr("transform", "translate(" + (margin / 2) + "," + (margin / 2) + ")");
+        
+        function updatePlot() {
+            group.selectAll("#path").remove();
+            group.append("path")
+                .attr("id", "path")
+                .datum(rawData)
+                .attr("fill", "none")
+                .attr("stroke", "#ff4f6c")
+                .attr("stroke-width", 3)
+                .attr("d", d3.line()
+                    .x(function (d) {
+                        return xScale(parseTime(d.date));
+                    })
+                    .y(function (d) {
+                        return yScale(d.rate * (count / 1000));
+                    })
+                );
+            count++;
+            if (count > 1000) {
+                clearInterval(interval);
+            }
+        }
+    </script>
+</body>
+</html>
