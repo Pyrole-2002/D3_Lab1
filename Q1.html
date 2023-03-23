@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Rubik', sans-serif;
+            }
+            .radio-label {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin: 10px;
+                padding: 10px 30px;
+                cursor: pointer;
+                border-radius: 50px;
+                transition: .3s;
+            }
+            .radio-input {
+                cursor: pointer;
+                left: 0;
+                top: 0;
+                width: 20px;
+                height: 20px;
+                border-radius: 0px;
+            }
+            .radio-text {
+                color: #efefef;
+                font-size: 30px;
+                margin: 10px 3px;
+            }
+            .radio-label:hover,
+            .radio-label:focus-within {
+                background: #3a356b;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Question 1</title>
+    </head>
+    <body style="
+    background-color: #060a1a;
+    ">
+        <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        ">
+            <h1 style="
+            color: #efefef;
+            font-size: 50px;
+            ">
+                Question 1
+            </h1>
+            <div style="
+            display: flex;
+            flex-direction: row;
+            ">
+                <label class="radio-label">
+                    <input type="radio" id="2011" class="radio-input" name="radio" checked>
+                    <div class="radio-text">2011</div>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" id="2012" class="radio-input" name="radio">
+                    <div class="radio-text">2012</div>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" id="2013" class="radio-input" name="radio">
+                    <div class="radio-text">2013</div>
+                </label>
+            </div>
+
+            <svg id="Question1" width="1100" height="750"></svg>
+    </div>
+    
+
+        <script>
+            let Names = [];
+            let X2011 = [];
+            let X2012 = [];
+            let X2013 = [];
+            
+            d3.csv("https://raw.githubusercontent.com/Pyrole-2002/D3_Lab1/main/yearwise.csv").then(function(data) {
+                data.forEach(function(d) {
+                    Names.push(d.Name);
+                    X2011.push(d.X2011);
+                    X2012.push(d.X2012);
+                    X2013.push(d.X2013);
+                });
+
+                xScale = d3.scaleBand()
+                    .domain(Names)
+                    .range([0, width])
+                    .padding(0.3);
+                var xAxis = d3.axisBottom(xScale)
+                    .tickFormat(function(d) {
+                        return d;
+                    });
+
+                group.append("g")
+                    .attr("transform", "translate(" + 0 + ", " + height + ")")
+                    .call(xAxis)
+                    .selectAll("line,path")
+                    .style("stroke", "#efefef")
+                    .style("stroke-width", "2px");
+                
+                group.append("g")
+                    .attr("transform", "translate(" + 0 + ", " + 0 + ")")
+                    .call(yAxis)
+                    .selectAll("line,path")
+                    .style("stroke", "#efefef")
+                    .style("stroke-width", "2px")
+                    
+                group.selectAll("text")
+                    .style("font-family", "Rubik")
+                    .style("fill", "#efefef")
+                    .style("font-size", "18px");
+
+                group.append("text")
+                    .attr("id", "yAxisLabel")
+                    .attr("transform", "rotate(-90)")
+                    .style("font-size", "25px")
+                    .attr("y", 40 - (margin / 2))
+                    .attr("x", -40 - (height / 2))
+                    .style("font-family", "Rubik")
+                    .style("fill", "#efefef")
+                    .text("VALUE");
+                
+                group.append("text")
+                    .attr("id", "xAxisLabel")
+                    .attr("y", height + 70)
+                    .attr("x", width / 2 - 30)
+                    .style("font-size", "25px")
+                    .style("font-family", "Rubik")
+                    .style("fill", "#efefef")
+                    .text("Name");
+                
+                group.append("text")
+                    .attr("id", "hoverText")
+                    .style("visibility", "hidden")
+                    .style("fill", "#efefef")
+                    .style("font-size", "24px");
+
+                updatePlot(X2011, xScale);
+            });
+                
+            var canvas = d3.select("#Question1");
+            var margin = 200;
+            var width = canvas.attr("width") - margin;
+            var height = canvas.attr("height") - margin;
+            
+            var yMax = 100;
+            var xScale;
+            var yScale = d3.scaleLinear()
+                .domain([yMax, 0])
+                .range([0, height]);
+            
+            var group = canvas.append("g")
+                .attr("transform", "translate(" + (margin / 2) + "," + (margin / 2) + ")");
+            
+            var yAxis = d3.axisLeft(yScale)
+                .tickFormat(function(d) {
+                    return d;
+                }); 
+            
+            function updatePlot(data) {
+                var bars = group.selectAll("rect")
+                    .data(data);
+                
+                bars.enter()
+                    .append("rect")
+                    .merge(bars)
+                    .attr("x", function(d, i) {
+                        return xScale(Names[i]);
+                    })
+                    .attr("height", 0)
+                    .attr("y", height)
+                    .attr("width", xScale.bandwidth())
+                    .transition()
+                    .duration(300)
+                    .attr("y", function(d) {
+                        return yScale(d);
+                    })
+                    .attr("height", function(d) {
+                        return height - yScale(d);
+                    })
+                    .style("fill", "#ff4f6c")
+                    .style("opacity", "0.3")
+                
+                group.selectAll("rect")
+                    .on("mouseover", function(event, d) {
+                        let i = d3.selectAll("rect")
+                            .nodes()
+                            .indexOf(this);
+                        let yHover = yScale(d) - 20;
+                        d3.select(this)
+                            .transition()
+                            .duration(250)
+                            .style("opacity", "1");
+                        d3.select("#hoverText")
+                            .text(Names[i] + ": " + d)
+                            .attr("transform", "translate(" + xScale(Names[i]) + ", " + yHover + ")")
+                            .style("visibility", "visible")
+                    })
+                    .on("mouseout", function(d, i) {
+                        d3.select(this)
+                            .transition()
+                            .duration(250)
+                            .style("opacity", "0.3");
+                        d3.select("#hoverText")
+                            .style("visibility", "hidden");
+                    })
+            }
+
+            document.getElementById("2011")
+                .addEventListener("click", function() {
+                    updatePlot(X2011);
+                });
+            document.getElementById("2012")
+                .addEventListener("click", function() {
+                    updatePlot(X2012);
+                });
+            document.getElementById("2013")
+                .addEventListener("click", function() {
+                    updatePlot(X2013);
+                });
+        </script>
+    </body>
+</html>
