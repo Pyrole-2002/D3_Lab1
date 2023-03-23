@@ -94,7 +94,6 @@
                 X2013.push(d.X2013);
             });
             rawData = data;
-            // console.log(rawData[1]["X2011"]);
 
             group.append("g")
                 .attr("transform", "translate(" + 0 + ", " + height + ")")
@@ -128,7 +127,7 @@
             group.append("text")
                 .attr("id", "xAxisLabel")
                 .attr("y", height + 70)
-                .attr("x", width / 2 - 30)
+                .attr("x", (width / 2) - 30)
                 .style("font-size", "25px")
                 .style("font-family", "Rubik")
                 .style("fill", "#efefef")

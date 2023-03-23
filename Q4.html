@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+        }
+
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Question 4.1</title>
+</head>
+
+<body style="
+    background-color: #060a1a;
+    ">
+    <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        ">
+        <h1 style="
+            color: #efefef;
+            font-size: 50px;
+            ">
+            Question 4.1
+        </h1>
+        <svg id="Question4" width="1100" height="1500"></svg>
+    </div>
+
+
+    <script>
+        let rawData = [];
+        let race = [];
+        let race_count = [];
+        let award = [];
+        let award_count = [];
+
+        d3.csv("https://raw.githubusercontent.com/Pyrole-2002/D3_Lab1/main/oscar_demographics.csv").then(function (data) {
+            data.forEach(function (d) {
+                if (!award.includes(d.award)) {
+                    award.push(d.award);
+                }
+                if (!race.includes(d.race_ethnicity)) {
+                    race.push(d.race_ethnicity)
+                    race_count.push({
+                        race: d.race_ethnicity,
+                        count: 1
+                    })
+                }
+                else {
+                    for (let i = 0; i < race_count.length; i++) {
+                        if (race_count[i].race === d.race_ethnicity) {
+                            race_count[i].count++;
+                        }
+                    }
+                }
+            });
+
+            xScale = d3.scaleBand()
+                .domain(race)
+                .range([0, width])
+                .padding(0.3);
+            var xAxis = d3.axisBottom(xScale)
+                .tickFormat(function (d) {
+                    return d;
+                });
+
+            group.append("g")
+                .attr("transform", "translate(" + 0 + ", " + height + ")")
+                .call(xAxis)
+                .selectAll("line,path")
+                .style("stroke", "#efefef")
+                .style("stroke-width", "2px");
+
+            group.append("g")
+                .attr("transform", "translate(" + 0 + ", " + 0 + ")")
+                .call(yAxis)
+                .selectAll("line,path")
+                .style("stroke", "#efefef")
+                .style("stroke-width", "2px")
+
+            group.selectAll("text")
+                .style("font-family", "Rubik")
+                .style("fill", "#efefef")
+                .style("font-size", "18px");
+
+            group.append("text")
+                .attr("id", "yAxisLabel")
+                .attr("transform", "rotate(-90)")
+                .style("font-size", "25px")
+                .attr("y", 40 - (margin / 2))
+                .attr("x", -40 - (height / 2))
+                .style("font-family", "Rubik")
+                .style("fill", "#efefef")
+                .text("VALUE");
+
+            group.append("text")
+                .attr("id", "xAxisLabel")
+                .attr("y", height + 70)
+                .attr("x", width / 2 - 30)
+                .style("font-size", "25px")
+                .style("font-family", "Rubik")
+                .style("fill", "#efefef")
+                .text("Name");
+
+            group.append("text")
+                .attr("id", "hoverText")
+                .style("visibility", "hidden")
+                .style("fill", "#efefef")
+                .style("font-size", "24px");
+
+            updatePlot(race_count.map(function (d) {
+                return d.count;
+            }));
+        });
+
+        var canvas = d3.select("#Question4");
+        var margin = 200;
+        var width = canvas.attr("width") - margin;
+        var height = canvas.attr("height") - margin;
+
+        var yMax = 450;
+        var xScale;
+        var yScale = d3.scaleLinear()
+            .domain([yMax, 0])
+            .range([0, height]);
+
+        var group = canvas.append("g")
+            .attr("transform", "translate(" + (margin / 2) + "," + (margin / 2) + ")");
+
+        var yAxis = d3.axisLeft(yScale)
+            .tickFormat(function (d) {
+                return d;
+            });
+
+        function updatePlot(data) {
+            var bars = group.selectAll("rect")
+                .data(data);
+
+            bars.enter()
+                .append("rect")
+                .merge(bars)
+                .attr("x", function (d, i) {
+                    return xScale(race[i]);
+                })
+                .attr("height", 0)
+                .attr("y", height)
+                .attr("width", xScale.bandwidth())
+                .transition()
+                .duration(300)
+                .attr("y", function (d) {
+                    return yScale(d);
+                })
+                .attr("height", function (d) {
+                    return height - yScale(d);
+                })
+                .style("fill", "#ff4f6c")
+                .style("opacity", "0.3")
+
+            group.selectAll("rect")
+                .on("mouseover", function (event, d) {
+                    let i = d3.selectAll("rect")
+                        .nodes()
+                        .indexOf(this);
+                    let yHover = yScale(d) - 20;
+                    d3.select(this)
+                        .transition()
+                        .duration(250)
+                        .style("opacity", "1");
+                })
+                .on("mouseout", function (d, i) {
+                    d3.select(this)
+                        .transition()
+                        .duration(250)
+                        .style("opacity", "0.3");
+                })
+        }
+    </script>
+</body>
+
+</html>
